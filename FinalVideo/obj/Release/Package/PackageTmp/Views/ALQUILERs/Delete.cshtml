@@ -1,0 +1,73 @@
+﻿@model FinalVideo.ALQUILER
+
+@{
+    ViewBag.Title = "Delete";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+<h2>Eliminar</h2>
+
+<h3>Está seguro de que desea eliminar esto?</h3>
+<div>
+    <h4>ALQUILER</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.ALQ_FECHA_DESDE)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ALQ_FECHA_DESDE)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ALQ_FECHA_HASTA)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ALQ_FECHA_HASTA)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ALQ_VALOR)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ALQ_VALOR)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.ALQ_FECHA_ENTREGA)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.ALQ_FECHA_ENTREGA)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PELICULA.PEL_NOMBRE)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PELICULA.PEL_NOMBRE)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.SOCIO.SOC_CEDULA)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.SOCIO.SOC_CEDULA)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="col-md-10">
+            <input type="submit" value="Delete" class="btn btn-success" /> 
+            @Html.ActionLink("Regresar", "Index", null, new { @class = "btn btn-warning" })
+        </div>
+    }
+</div>

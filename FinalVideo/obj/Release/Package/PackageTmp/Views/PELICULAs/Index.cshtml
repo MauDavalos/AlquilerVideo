@@ -1,0 +1,64 @@
+﻿@model IEnumerable<FinalVideo.PELICULA>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+
+
+
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.PEL_NOMBRE)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PEL_COSTO)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.PEL_FECHA_ESTRENO)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.DIRECTOR.DIR_NOMBRE)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.FORMATO.FOR_NOMBRE)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.GENERO.GEN_NOMBRE)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.PEL_NOMBRE)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PEL_COSTO)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.PEL_FECHA_ESTRENO)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.DIRECTOR.DIR_NOMBRE)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.FORMATO.FOR_NOMBRE)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.GENERO.GEN_NOMBRE)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.PEL_ID }) |
+            @Html.ActionLink("Details", "Details", new { id=item.PEL_ID }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.PEL_ID })
+        </td>
+    </tr>
+}
+
+</table>

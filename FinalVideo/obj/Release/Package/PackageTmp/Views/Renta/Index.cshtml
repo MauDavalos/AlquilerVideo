@@ -1,0 +1,271 @@
+﻿@model FinalVideo.ALQUILER
+@using System.Collections.Generic;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout1.cshtml";
+}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<div class="col-md-offset-1"><br /><br />
+<h1>Rentar pelicula</h1>
+<br /><br /></div>
+<div class="form-group">
+    <div class="col-md-10 col-md-offset-1">
+        @Html.LabelFor(model => model.SOC_ID, htmlAttributes: new { @class = "control-label col-md-3" })
+        @Html.DropDownList("SOC_ID", null, htmlAttributes: new { @class = "form-control" })
+        @Html.ValidationMessageFor(model => model.SOC_ID, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-10 col-md-offset-5">
+        <br />
+        <button id="btn_agregar_pedido" class="btn btn-primary">Añadir película</button>
+        <br />
+        <br />
+        <br />
+    </div>
+</div>
+@using (Html.BeginForm())
+{
+    <div class="col-md-10 col-md-offset-1">
+        <table id="tabla_pedidos" class="table">
+            <thead>
+                <tr id="titulo_tabla">
+                    <th>Socio</th>
+                    <th>Película</th>
+                    <th>Fecha desde</th>
+                    <th>Fecha hasta</th>
+                    <th>Valor alquiler</th>
+                    <th>Eliminar</th>
+                </tr>
+            </thead>
+
+            <div class="col-md-10 col-md-offset-10">
+                 <tr id="fila_total">
+                
+                <td><strong>Consumo final</strong></td>
+                <td id="sumatotal">0</td>
+            </tr>
+
+            </div>
+           
+        </table>
+        <div class="col-md-offset-5">
+            <br />
+            <input type="submit" value="Confirmar Renta" class="btn btn-success" />
+        </div>
+       
+    </div>
+}
+
+<script>
+        //VARIABLES GLOBALES
+        var inputs = [];//Es una matriz que contine todos los inputs de cada fila
+        var costos = [];//Es vector que contineel input costo de cada fila
+        var peliculas_costos = @Html.Raw(Json.Encode(ViewBag.PEL_COSTOS));
+        var peliculas = @Html.Raw(Json.Encode(ViewBag.PEL_NOMBRES));
+        var total = 0;
+
+        //FUNCIONES AUXILIARES
+            //Funciones Lógicas
+        function ActualizarSumaTotal() {
+            total = 0;
+            var inputs_costos = document.getElementsByClassName('input_costo');
+            console.log("" + inputs_costos.length);
+            for (var i = 0; i < inputs_costos.length; i++) {//NOTA: POR ALGUNA RAZON FOREACH DA ERRORES
+                var valor_input = inputs_costos[i].value;
+                total += parseInt(valor_input);
+                console.log(""+total);
+            }
+            document.getElementById("sumatotal").innerHTML = total.toString();
+        }
+        function CerosIzquierda(value, length) {
+            return (value.toString().length < length) ? CerosIzquierda("0" + value, length) :
+            value;
+        }
+            //Funciones Visuales
+        function  CrearDropdownList(nombre,id,array_value,array_name) {//(nombre para el input dropdwon,id para el input dropdown,arreglo de valores, arreglo de nombres)
+            var drop_texto = "<select name='" + nombre + "' id='" + id + "' class = 'select_pelicula form-control'>";
+
+            for (contador in array_value) {
+
+                    var valor = array_value[contador];
+                    var nombre = array_name[contador];
+                drop_texto += "<option value='" + valor + "'>" + nombre + "</option>";
+            }
+            drop_texto += "</select>";
+            return drop_texto;
+        }
+
+        //Funciones Eventos
+        $(document).ready(function () {//Al cargar
+            //Asignacion De Evento A Boton Agregar Pedido
+            $("#btn_agregar_pedido").click(function () {//Al presionar agregar pedido
+                var soc_id = $("#SOC_ID").val();//La Persona Seleccionada Seleccionado
+                var alq_valor = 0;
+
+                for (aux in peliculas_costos) {//ASIGNA O SELECCIONA "LA PRIMERA PELÍCULA" AL DROPDOWNLIST DE LA NUEVA FILA
+                    if (peliculas_costos[aux] != null) {
+                        alq_valor = parseInt(peliculas_costos[aux]);
+                        break;
+                    }
+                }
+
+                var hoy = new Date();//OBTIENE LA FECHA Y HORA DE HOY
+                var manana = new Date();
+                manana.setDate(manana.getDate() + 1);
+
+
+                var fecha_hoy = CerosIzquierda(hoy.getFullYear(), 4) + "-" + CerosIzquierda((hoy.getMonth() + 1),2)+ "-" + CerosIzquierda(hoy.getDate(),2);
+                var fecha_manana = CerosIzquierda(manana.getFullYear(), 4) + "-" + CerosIzquierda((manana.getMonth() + 1), 2) + "-" + CerosIzquierda(manana.getDate(), 2);
+                //console.log("FECHA:" + manana);
+
+                var personas_nombres = @Html.Raw(Json.Encode(ViewBag.SOC_NOMBRES));//Obtiene un arreglo del Viewbag y lo asigna a persona_nombres
+                var peliculas_nombres = @Html.Raw(Json.Encode(ViewBag.PEL_NOMBRES));//Obtiene un arreglo del Viewbag y lo asigna a peliculas_nombres
+                var peliculas_id = @Html.Raw(Json.Encode(ViewBag.PEL_IDS));  //Obtiene un arreglo del Viewbag y lo asigna a peliculas_id
+
+                $("#fila_total").before(//obtiene el elemento con el id fila_total. La funcion before agrega nuevos elementos antes de fila_total
+                    "<tr>" +
+                    "<td> " +
+
+                    "<input type='hidden' name='[" + inputs.length + "].SOC_ID' id='[" + inputs.length + "].SOC_ID'  value='" + soc_id + "' >" +
+
+                    personas_nombres[parseInt(soc_id)] +
+                    "</td>" +
+
+                    "<td class='td_pelicula'>" +
+                    CrearDropdownList("[" + inputs.length + "].PEL_ID", "[" + inputs.length + "].PEL_ID", peliculas_id, peliculas_nombres)+
+                    "</td>" +
+
+                    "<td>" +
+
+                    "<input id='[" + inputs.length + "].ALQ_FECHA_DESDE' name='[" + inputs.length + "].ALQ_FECHA_DESDE' type='date' value='" + fecha_hoy + "' min='" + fecha_hoy + "' max='" + fecha_hoy + "'  class = 'form-control datepicker'>" +
+                    "</td>" +
+
+                    "<td class = 'td_fecha_hasta'>" +
+                    "<input id='[" + inputs.length + "].ALQ_FECHA_HASTA' name='[" + inputs.length + "].ALQ_FECHA_HASTA' type='date' value='" + fecha_manana + "' min='" + fecha_manana + "' class = 'fecha_manana form-control datepicker'>" +
+                    "</td>" +
+
+
+                    "<td class='td_costo'>" +
+
+                    "<input type='hidden' name='[" + inputs.length + "].ALQ_VALOR' id='[" + inputs.length + "].ALQ_VALOR' value='" + alq_valor + "' class = 'input_costo'>" +
+                    "<div class = 'txt_valor'>"+alq_valor + "</div>"+
+                    "</td>" +
+                    "<input type='hidden' name='[" + inputs.length + "].ALQ_FECHA_ENTREGA' id='[" + inputs.length + "].ALQ_FECHA_ENTREGA' value='" + fecha_manana + "'>" +
+                    "<td>" +
+                        "<div>" +
+                            "<input type='button' class=' btn btn-danger quitar'  id='' value='Borrar'>" +
+                        "</div>"+
+                    "</td>" +
+                    "</tr>");
+                    inputs.push([document.getElementById("[" + inputs.length + "].SOC_ID"), document.getElementById("[" + inputs.length + "].PEL_ID"), document.getElementById("[" + inputs.length + "].ALQ_FECHA_DESDE"), document.getElementById("[" + inputs.length + "].ALQ_FECHA_HASTA"), document.getElementById("[" + inputs.length + "].ALQ_VALOR"), document.getElementById("[" + inputs.length + "].ALQ_FECHA_ENTREGA")]);
+                    costos.push(document.getElementById("[" + inputs.length + "].ALQ_VALOR"));
+                    ActualizarSumaTotal();
+
+            });
+
+        });
+        //AL CAMBIAR LA PELICULA EN LA FILA
+            $(document).on('change', '.select_pelicula', function (event) {
+
+
+                var celda_valor = $(this).closest('tr').children(".td_costo");
+                var celda_fecha_hasta = $(this).closest('tr').children(".td_fecha_hasta");
+                var celda_pelicula = $(this).closest('tr').children(".td_pelicula");
+
+                var input_costo = celda_valor.children(".input_costo");
+                var texto_costo = celda_valor.children(".txt_valor");
+
+                var input_fecha_hasta = celda_fecha_hasta.children(".fecha_manana");
+                var fecha_hasta_alquiler = new Date(input_fecha_hasta.val());
+
+                var hoy = new Date();
+                var fecha_hoy = CerosIzquierda(hoy.getFullYear(), 4) + "-" + CerosIzquierda((hoy.getMonth() + 1),2)+ "-" + CerosIzquierda(hoy.getDate(),2);
+                var fecha_desde_alquiler = new Date(fecha_hoy);
+
+
+                var dias = (fecha_hasta_alquiler.getTime() - fecha_desde_alquiler.getTime()) / (1000 * 60 * 60 * 24);
+                var alquiler = parseFloat(peliculas_costos[celda_pelicula.children(".select_pelicula").val()]);
+                var total_costo = dias * alquiler;
+
+                input_costo.val(total_costo);
+                texto_costo.empty();
+                texto_costo.text(total_costo);
+                ActualizarSumaTotal();
+            });
+        //AL CAMBIAR LA FECHA DE ENTREGA
+            $(document).on('change', '.fecha_manana', function (event) {
+
+
+                var celda_valor = $(this).closest('tr').children(".td_costo");
+                var celda_fecha_hasta = $(this).closest('tr').children(".td_fecha_hasta");
+                var celda_pelicula = $(this).closest('tr').children(".td_pelicula");
+
+                var input_costo = celda_valor.children(".input_costo");
+                var texto_costo = celda_valor.children(".txt_valor");
+
+                var input_fecha_hasta = celda_fecha_hasta.children(".fecha_manana");
+                var fecha_hasta_alquiler = new Date(input_fecha_hasta.val());
+
+                var hoy = new Date();
+                var fecha_hoy = CerosIzquierda(hoy.getFullYear(), 4) + "-" + CerosIzquierda((hoy.getMonth() + 1),2)+ "-" + CerosIzquierda(hoy.getDate(),2);
+                var fecha_desde_alquiler = new Date(fecha_hoy);
+
+
+                var dias = (fecha_hasta_alquiler.getTime() - fecha_desde_alquiler.getTime()) / (1000 * 60 * 60 * 24);
+                var alquiler = parseFloat(peliculas_costos[celda_pelicula.children(".select_pelicula").val()]);
+                var total_costo = dias * alquiler;
+
+                input_costo.val(total_costo);
+                texto_costo.empty();
+                texto_costo.text(total_costo);
+                ActualizarSumaTotal();
+            });
+
+        //AL BORRAR UNA FILA
+        $(document).on('click', '.quitar', function (event) {
+            event.preventDefault();
+            $(this).closest('tr').remove();
+
+
+
+            //ELIMINA DE LA LISTA(La matriz que contiene todos los inputs)LOS INPUTS QUE FUERON BORRADOS
+            for (var indice in inputs) {//recorre la matriz de inputs y elimina la fila que contiene
+                if (!(document.getElementById((inputs[indice])[0].id + ""))) {
+
+                    inputs.splice(indice, 1);//elimina de la lista de la matriz
+                    costos.splice(indice, 1);//elimina de la lista del vector que contiene los inputs de costo
+                    break;
+                }
+            }
+
+            for (var indice in inputs) {//reasigna los id y name de cada input, ya que debido a que se eliminó uno quedará un espacio vacío (ejempplo 1, 2, 4)
+                //input_interno = inputs[indice];
+
+                (inputs[indice])[0].id = "[" + indice + "].SOC_ID";
+                (inputs[indice])[0].name = "[" + indice + "].SOC_ID";
+
+
+                (inputs[indice])[1].id = "[" + indice + "].PEL_ID";
+                (inputs[indice])[1].name = "[" + indice + "].PEL_ID";
+
+
+                (inputs[indice])[2].id = "[" + indice + "].ALQ_FECHA_DESDE";
+                (inputs[indice])[2].name = "[" + indice + "].ALQ_FECHA_DESDE";
+
+
+                (inputs[indice])[3].id = "[" + indice + "].ALQ_FECHA_HASTA";
+                (inputs[indice])[3].name = "[" + indice + "].ALQ_FECHA_HASTA";
+
+
+                (inputs[indice])[4].id = "[" + indice + "].ALQ_VALOR";
+                (inputs[indice])[4].name = "[" + indice + "].ALQ_VALOR";
+
+
+                (inputs[indice])[5].id = "[" + indice + "].ALQ_FECHA_ENTREGA";
+                (inputs[indice])[5].name = "[" + indice + "].ALQ_FECHA_ENTREGA";
+            }
+            ActualizarSumaTotal();
+        });
+</script>
+
